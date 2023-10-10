@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from datetime import date
 
 # URL do site de notícias que você deseja acessar
 url = 'https://doentesporfutebol.com.br/guiadejogos/'
@@ -12,16 +13,27 @@ if response.status_code == 200:
     # Parse o conteúdo da página com Beautiful Soup
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    # Encontre os elementos que contêm os títulos e links dos jogos
-    games = soup.find_all('a', class_='elementor-widget-container')  
+    # Obtém a data atual
+    today = date.today().strftime('%d/%m/%Y')
 
-    # Loop pelos jogos e imprima os títulos e links
-    for game in games:
-        titulo = game.text
-        link = game['href']
-        print(f'Título: {titulo}')
-        print(f'Link: {link}')
+    # Encontra os elementos que contêm as informações dos jogos de hoje
+    matches = soup.find_all('div', class_='elementor-widget-container')
+
+    # Itera pelos elementos dos jogos
+    for match in matches:
+        date = match.find('span', class_='match__date').text
+        if today in date:
+            time = match.find('span', class_='match__time').text
+            teams = match.find_all('span', class_='match__team')
+            team1 = teams[0].text
+            team2 = teams[1].text
+            broadcast = match.find('div', class_='match__broadcast').text.strip()
+
+            # Imprime as informações do jogo
+            print(f'Match date: {date}')
+            print(f'Match time: {time}')
+            print(f'{team1} x {team2}')
+            print(f'Broadcast channel: {broadcast}')
+            print('-' * 50)
 else:
-    print('Falha ao acessar a página de notícias.')
-
-
+    print('Failed to access the matches page.')
